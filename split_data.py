@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def split_his_furture(arr, his_win, fur_win, slide_win):
+def split_hist_future(arr, hist_win, future_win, slide_win):
     # arr: m*n
     # m: number of timepoints
     # n: number of features
@@ -9,14 +9,14 @@ def split_his_furture(arr, his_win, fur_win, slide_win):
     if len(arr.shape) == 1:
         arr = arr.reshape(arr.shape[0], 1)
     n_timepoints = arr.shape[0]
-    t_start = his_win
-    t_end = n_timepoints - fur_win
-    his = []
+    t_start = hist_win
+    t_end = n_timepoints - future_win
+    hist = []
     future = []
     for t in range(t_start, t_end, slide_win):
-        his.append(arr[t-his_win:t, :])
-        future.append(arr[t:t+fur_win, :])
-    return np.array(his), np.array(future)
+        hist.append(arr[t-hist_win:t, :])
+        future.append(arr[t:t+future_win, :])
+    return np.array(hist), np.array(future)
 
 
 def train_test_split(x, y=None, train_size=0.66, random_state=0, shuffle=True):
