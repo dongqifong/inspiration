@@ -40,7 +40,7 @@ def valid_one_epoch(model: nn.Module, valid_loader: DataLoader, **kwargs):
 
 def show_progress(epoch, epochs, train_loss, valid_loss):
     print(
-        f"{epoch+1}/{epochs}, train_loss:{train_loss[-1]}, valid_loss:{valid_loss[-1]}", end="\r")
+        f"[{epoch+1}/{epochs}], train_loss:{train_loss[-1]}, valid_loss:{valid_loss[-1]}", end="\r")
 
 
 class Trainer:
