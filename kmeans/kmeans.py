@@ -1,39 +1,37 @@
 import torch
+import numpy as np
 
 
 class Kmeans:
-    def __init__(self, n_clusters=2, max_iters=10000) -> None:
+    def __init__(self, n_clusters=2, max_iters=1000) -> None:
         self.n_clusters = n_clusters
         self.max_iters = max_iters
-        pass
+
+        self.centers = None
+        self.labels = None
+        self.iters = 0
 
     def fit(self, x):
-        x = torch.randn((64, 15))
-
-        # 初始化各cluster中心點
+        # 隨機從x中挑選出n個點做為初始化cluster的中心
         x_shape = x.shape
-        noise = torch.randn((self.n_clusters, x_shape[-1]))  # (2,n_features)
-        mu = torch.mean(x, dim=0, keepdim=True)  # (1,n_features)
-        centers_old = mu + noise  # (2,n_features)
-
-        # clusters = [[]for i in range(self.n_clusters)]
-        # d_clusters = [[]for i in range(self.n_clusters)]
+        if self.centers is None:
+            centers_old = x[np.random.choice(
+                x_shape[0], self.n_clusters, replace=False)]
+        else:
+            centers_old = self.centers
 
         for i in range(self.max_iters):
-
+            d_clusters = torch.zeros((self.n_clusters, x_shape[0]))
             # 計算每個點跟各cluster center的距離
-            for i in range(self.n_clusters):
-                d = self.get_distance(centers_old[i:i+1], x)
-                d_clusters[i] = d  # (2,n_batch)
+            for j in range(self.n_clusters):
+                d = self.get_distance(centers_old[j:j+1], x)
+                d_clusters[j] = d  # (2,n_batch)
 
             # 求每個點應該屬於哪個cluster
-            clusters_idx = self.clustering(torch.tensor(d_clusters))  # n_batch
-            for i in range(self.n_clusters):
-                mask_i = torch.where(clusters_idx == i)
-                clusters[i] = x[mask_i]
+            labels = self.clustering(d_clusters)  # n_batch
 
             # 更新各cluster center的位置
-            centers_new = self.update_center(clusters)
+            centers_new = self.update_center(labels, x)
 
             # 如果center沒有變化,則視為收斂
             if self.is_converge(centers_old, centers_new):
@@ -41,29 +39,45 @@ class Kmeans:
             else:
                 centers_old = centers_new
 
+        self.centers = centers_new
+        self.labels = labels
+        self.iters = i
+        return None
+
     def get_distance(self, center, x):
-        d = torch.sum((x - center)**2, dim=1)
-        d = torch.sqrt(d)/x.shape[1]
+        d = torch.sum((x - center)**2, dim=1)/x.shape[1]
+        d = torch.sqrt(d)
         return d  # (n_batch)
 
     def clustering(self, d_clusters):
-        cluster_idx = torch.argmin(d_clusters, dim=0)
-        return cluster_idx
+        labels = torch.argmin(d_clusters, dim=0)
+        return labels
 
-    def update_center(self, clusters):
+    def update_center(self, labels, x):
         centers = []
-        for i in range(len(clusters)):
-            center = torch.mean(clusters[i], dim=0)
+        for i in range(self.n_clusters):
+            mask_i = torch.where(labels == i)
+            center = torch.mean(x[mask_i], dim=0)
             centers.append(center)
-        return torch.tensor(centers)  # (2,n_features)
+        return torch.stack(centers)
 
-    def is_converge(centers_old, centers_new):
+    def is_converge(self, centers_old, centers_new):
         if torch.equal(centers_old, centers_new):
             return True
         else:
             return False
 
 
-a = torch.tensor([[1.1], [2.0]])
-b = torch.tensor([[1.0], [2.0]])
-print(torch.equal(a, b))
+if __name__ == "__main__":
+    from sklearn.datasets import make_blobs
+    n_samples = 100
+    n_features = 5
+    centers = 4
+    x, y = make_blobs(n_samples=n_samples, n_features=n_features,
+                      centers=centers, random_state=42)
+    x = torch.tensor(x)
+    clf = Kmeans(n_clusters=centers)
+    clf.fit(x)
+    print(clf.iters)
+    print(clf.labels)
+    print(y)
