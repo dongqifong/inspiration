@@ -1,5 +1,28 @@
 import torch
-import torch.nn as nn
+
+
+def train_one_epoch(model, train_loader, loss_func, optimizer):
+    model.train()
+    running_loss = 0.0
+    for batch_idx, (x, y) in enumerate(train_loader):
+        out = model(x)
+        optimizer.zero_grad()
+        loss = loss_func(out, y)
+        loss.backward()
+        optimizer.step()
+        running_loss = running_loss + loss.item()
+    return round(running_loss / (batch_idx+1), 5)
+
+
+def valid_one_epoch(model, valid_loader, loss_func):
+    model.eval()
+    running_loss = 0.0
+    with torch.no_grad():
+        for batch_idx, (x, y) in enumerate(valid_loader):
+            out = model(x)
+            loss = loss_func(out, y)
+            running_loss = running_loss + loss.item()
+    return round(running_loss / (batch_idx+1), 5)
 
 
 class Trainer:
@@ -50,28 +73,3 @@ def save_model(model, model_name: str, mode="full"):
         torch.save(model, model_name+"_full_model.pth")
     else:
         torch.save(model.state_dict(), model_name+"_state_dict.pth")
-
-
-def train_one_epoch(model, train_loader, loss_func, optimizer):
-    model.train()
-    running_loss = 0.0
-    for batch_idx, (x, y) in enumerate(train_loader):
-        out = model(x)
-        optimizer.zero_grad()
-        loss = loss_func(out, y)
-        loss.backward()
-        optimizer.step()
-        running_loss = running_loss + loss.item()
-    return round(running_loss / (batch_idx+1), 5)
-
-
-def valid_one_epoch(model, valid_loader, loss_func):
-    model.eval()
-    running_loss = 0.0
-    with torch.no_grad():
-        for batch_idx, (x, y) in enumerate(valid_loader):
-            out = model(x)
-            loss = loss_func(out, y)
-            loss.backward()
-            running_loss = running_loss + loss.item()
-    return round(running_loss / (batch_idx+1), 5)
