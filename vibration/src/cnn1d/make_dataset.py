@@ -27,7 +27,7 @@ class CNN1dDataset(Dataset):
     def __len__(self):
         return len(self.x_arr)
     
-def get_loader(x,y,batch_size=1,shuffle=False):
-    dataset = CNN1dDataset(x,y)
+def get_loader(x,label=None,batch_size=1,shuffle=False):
+    dataset = CNN1dDataset(x,label)
     dataloader = DataLoader(dataset,batch_size=batch_size,shuffle=shuffle)
     return dataloader
