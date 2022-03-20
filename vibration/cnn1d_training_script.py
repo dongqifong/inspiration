@@ -11,11 +11,11 @@ import numpy as np
 from src.cnn1d import model,trainer,make_dataset
 
 n_data = 30
-train_x = np.random.random((n_data,1,3200))
+train_x = np.random.random((n_data,3200,3))
 train_y = np.random.randint(0,3,n_data)
 
 n_data = 10
-valid_x = np.random.random((n_data,1,3200))
+valid_x = np.random.random((n_data,3200,3))
 valid_y = np.random.randint(0,3,n_data)
 
 train_loader = make_dataset.get_loader(train_x,train_y,batch_size=15,shuffle=False)
