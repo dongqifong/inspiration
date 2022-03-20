@@ -4,6 +4,7 @@ Created on Sat Mar 19 01:31:55 2022
 
 @author: henry
 """
+from pathlib import Path
 
 import torch
 import torch.optim as optim
@@ -67,10 +68,6 @@ class Trainer:
         
         self.show_period = 5
         
-        
-        
-
-        
     def train(self,epochs):
         for epoch in range(epochs):
             if self.valid_loader is not None:
@@ -83,7 +80,14 @@ class Trainer:
         return None
             
             
-            
+    def save_model(self,save_dir,model_name:str):
+        model_path_state_dict = Path(save_dir) / (model_name + "_state_dict.pth")
+        model_path_full = Path(save_dir) / (model_name + "_full.pth")
+        self.model.cpu()
+        self.model.eval()
+        torch.save(self.model.state_dict(),model_path_state_dict)
+        torch.save(self.model,model_path_full)
+        return None
             
             
             

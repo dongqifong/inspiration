@@ -13,5 +13,4 @@ class LossFunc(nn.Module):
         pass
     
     def forward(self,y_pred,y_true):
-        
         return nn.CrossEntropyLoss()(y_pred,y_true)

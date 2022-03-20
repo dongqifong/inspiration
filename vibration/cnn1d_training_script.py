@@ -26,4 +26,3 @@ trainer_cnn1d = trainer.Trainer(model=model_cnn1d, train_loader=train_loader,val
 
 
 trainer_cnn1d.train(10)
-
