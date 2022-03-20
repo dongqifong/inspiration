@@ -13,7 +13,7 @@ class ModelCNN1d(nn.Module):
     def __init__(self):
         # assume input_size = 3200
         super().__init__()
-        self.conv1 = nn.Conv1d(in_channels=1, out_channels=16, kernel_size=128,stride=32) # (16,97)
+        self.conv1 = nn.Conv1d(in_channels=3, out_channels=16, kernel_size=128,stride=32) # (16,97)
         self.conv2 = nn.Conv1d(in_channels=16, out_channels=32, kernel_size=32,stride=4) # (32,17)
         self.conv3 = nn.Conv1d(in_channels=32, out_channels=64, kernel_size=16,stride=2) # (64,1)
         self.fc1 = nn.Linear(in_features=64, out_features=32)

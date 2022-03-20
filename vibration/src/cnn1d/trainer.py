@@ -5,10 +5,6 @@ Created on Sat Mar 19 01:31:55 2022
 @author: henry
 """
 
-import os
-from pathlib import Path
-os.chdir(Path("C:/Users/henry/Desktop/python"))
-
 import torch
 import torch.optim as optim
 
@@ -55,9 +51,10 @@ class Trainer:
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model = model.to(self.device)
         
+        
+        self.train_loader = train_loader
         self.train_loss_hist = []
         
-        self.train_loader = None
         if valid_loader is not None:
             self.valid_loader = valid_loader
             self.valid_loss_hist = []
@@ -79,7 +76,7 @@ class Trainer:
             if self.valid_loader is not None:
                 running_loss = valid_one_epoch(self.model, self.valid_loader, self.loss_func,self.device)
                 self.valid_loss_hist.append(running_loss)
-            running_loss = train_one_epoch(self.model, self.valid_loader, self.loss_func, self.optimizer,self.device)
+            running_loss = train_one_epoch(self.model, self.train_loader, self.loss_func, self.optimizer,self.device)
             self.train_loss_hist.append(running_loss)
             if (epoch+1)%self.show_period==0 or epoch==0:
                 show_training_loss(epoch,epochs, self.train_loss_hist, self.valid_loss_hist)
