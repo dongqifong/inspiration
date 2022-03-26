@@ -127,3 +127,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+vibration_diagnose/ref/CWRU-1-master.zip
