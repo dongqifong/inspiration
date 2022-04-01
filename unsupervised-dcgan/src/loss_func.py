@@ -15,16 +15,19 @@ def fraud_loss(d_fake):
     # d_fake: D(G(z))
     device = d_fake.device
     n = d_fake.shape[0]
-    alpha = torch.ones((n,1)).float().to(device)
-    return nn.BCELoss()(d_fake,alpha)
+    alpha = torch.ones((n,)).long().to(device)
+    return nn.CrossEntropyLoss()(d_fake,alpha)
 
-def apparent_loss(x,x_):
+def apparent_loss(x,x_,dim=None):
+    # d = x - x_
     d = x - x_
-    return torch.norm(d,p=1)
+    d_norm = torch.norm(d,p=1,dim=dim) / (d.shape[0]*d.shape[1]*d.shape[2])
+    return d_norm
 
-def latent_loss(z,z_):
+def latent_loss(z,z_,dim=None):
     d = z - z_
-    return torch.norm(d,p=1)
+    d_norm = torch.norm(d,p=1,dim=dim) / (d.shape[0]*d.shape[1]*d.shape[2])
+    return d_norm
 
 class GLoss(nn.Module):
     def __init__(self,wf=0.33,wa=0.33,wl=0.33):
@@ -45,22 +48,23 @@ class DLoss(nn.Module):
     def forward(self,d_real, d_fake):
         device = d_real.device
         n = d_real.shape[0]
-        real_label = torch.ones((n,1)).float().to(device)
-        fake_label = torch.zeros((n,1)).float().to(device)
-        d_loss = nn.BCELoss()(d_real,real_label) + nn.BCELoss()(d_fake,fake_label)
+        real_label = torch.ones((n,)).long().to(device)
+        fake_label = torch.zeros((n,)).long().to(device)
+        d_loss = nn.CrossEntropyLoss()(d_real,real_label) + nn.CrossEntropyLoss()(d_fake,fake_label)
         return d_loss / 2
     
 
 def anomaly_score(x,x_,z,z_):
-    return apparent_loss(x,x_) + latent_loss(z,z_)
+    return apparent_loss(x,x_,dim=(1,2)) + latent_loss(z,z_,dim=(1,2))
     
 
 if __name__ == "__main__":
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
+    device = "cpu"
     print(device)
     
-    d_real = nn.Sigmoid()(torch.randn((10,1)).to(device))
-    d_fake = nn.Sigmoid()(torch.randn((10,1)).to(device))
+    d_real = nn.Sigmoid()(torch.randn((10,2)).to(device))
+    d_fake = nn.Sigmoid()(torch.randn((10,2)).to(device))
     dloss = DLoss()
     loss_d = dloss(d_real, d_fake)
     print(loss_d)
@@ -75,5 +79,5 @@ if __name__ == "__main__":
     
     print(anomaly_score(x,x_,z,z_))
     print(apparent_loss(x,x_))
-    
+    print(latent_loss(z,z_))
     

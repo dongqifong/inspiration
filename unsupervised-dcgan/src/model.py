@@ -29,7 +29,7 @@ class Encoder(nn.Module):
             # input_channels:3
             # input_size:512
         self.conv1 = CNNBlock(input_channels=input_channels, out_channels=240, kernel_size=32, stride=16, groups=3) # (-1,240,61)
-        self.conv2 = nn.Conv1d(in_channels=240,out_channels=12,kernel_size=8,stride=2)
+        self.conv2 = nn.Conv1d(in_channels=240,out_channels=12,kernel_size=8,stride=2,bias=False)
         
     def forward(self,x):
         x = self.conv1(x)
@@ -42,23 +42,36 @@ class Decoder(nn.Module):
         # assume: 
             # input_channels:3
             # input_size:512
-        self.conv1 = nn.Sequential(nn.ConvTranspose1d(in_channels=12, out_channels=240, kernel_size=8,stride=2,output_padding=1),
+        self.conv1 = nn.Sequential(nn.ConvTranspose1d(in_channels=12, out_channels=240, kernel_size=8,stride=2,output_padding=1,bias=False),
                                    nn.BatchNorm1d(240),
                                    nn.ReLU(),
-                                   nn.ConvTranspose1d(in_channels=240, out_channels=3, kernel_size=32,stride=16,groups=3),
+                                   nn.ConvTranspose1d(in_channels=240, out_channels=3, kernel_size=32,stride=16,groups=3,bias=False),
                                    nn.BatchNorm1d(3))
     def forward(self,x):
         x_ = self.conv1(x)
         return x_   
 
-class Discriminator(nn.Module):
-    def __init__(self,input_channels:int):
+class Generator(nn.Module):
+    def __init__(self):
         super().__init__()
-        self.conv1 = Encoder(input_channels)
+        self.encoder1 = Encoder(3)
+        self.decoder = Decoder(240)
+        self.encoder2 = Encoder(3)
         
-        self.clf = nn.Sequential(nn.Linear(in_features=48, out_features=24),
+    def forward(self,x):
+        z = self.encoder1(x)
+        x_ = self.decoder(z)
+        z_ = self.encoder2(x_)
+        return x_, z, z_
+        
+class Discriminator(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = Encoder(3)
+        
+        self.clf = nn.Sequential(nn.Linear(in_features=48, out_features=24,bias=False),
                                  nn.ReLU(),
-                                 nn.Linear(in_features=24, out_features=1),
+                                 nn.Linear(in_features=24, out_features=2,bias=False),
                                  nn.Sigmoid()
                                  )
         
@@ -78,9 +91,17 @@ if __name__ == "__main__":
     x_ = decoder(z)
     print(x_.shape)
     
-    disc = Discriminator(3)
+    disc = Discriminator()
     y = disc(x)
     print(y.shape)
+    
+    generator = Generator()
+    x_, z, z_ = generator(x)
+    print(x_.shape)
+    print(z.shape)
+    print(z_.shape)    
+    
+    
 
 
 
