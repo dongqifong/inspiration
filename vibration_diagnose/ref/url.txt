@@ -1,1 +1,3 @@
 https://github.com/XiongMeijing/CWRU-1
+
+https://clay-atlas.com/blog/2020/01/09/pytorch-chinese-tutorial-mnist-generator-discriminator-mnist/
