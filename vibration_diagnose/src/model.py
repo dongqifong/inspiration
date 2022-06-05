@@ -98,8 +98,16 @@ class Discriminator(nn.Module):
         x = x.view(-1,36)
         x = self.clf(x)
         return x
-        
 
+def train_d_one_epoch(discriminator, data_loader, optimizer):
+    for batch_idx, x in enumerate(data_loader):
+        optimizer.zero_grad()
+        x_reconst, z1, z2 = discriminator(x)
+        
+        
+        
+        
+        
 if __name__ == "__main__":
     n_channels = 1
         
